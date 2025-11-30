@@ -1,0 +1,41 @@
+name: Deploy Portfolio to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]  # or 'master' if you use that
+  workflow_dispatch:    # allow manual runs from Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # If you ever add a build step (e.g., npm build), do it here.
+      # For now, it's just static HTML.
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .   # upload everything in the repo (or 'dist' if you build)
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
